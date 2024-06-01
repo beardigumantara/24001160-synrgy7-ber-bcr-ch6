@@ -1,6 +1,8 @@
 import bycriptjs from 'bcryptjs';
 import { getAllUsers, getUserId, postUser, putUser, removeUser, getUserByEmail } from '../services/usersService';
 import jwt from 'jsonwebtoken';
+import { log } from 'console';
+import { UsersModel } from '../models/UsersModel';
 
 const SALT : number = 10;
 
@@ -34,13 +36,14 @@ export const getUserById = async (req: any, res: any) => {
 
 export const register = async (req: any, res: any) => {
     try {
-        const {name, email, password, role} = req.body;
+        const defaultRole = "member";
+        const {name, email, password} = req.body;
         const hashpassword = await bycriptjs.hash(password, SALT);
         const user = await postUser({
             name,
             email,
             password: hashpassword,
-            role,
+            role: defaultRole,
         });
 
         res.status(201).json({
@@ -58,6 +61,12 @@ export const register = async (req: any, res: any) => {
 export const updateUser = async (req: any, res: any) => {
     try {
         const {name, email, password, role} = req.body;
+        const checkUser = req.user;
+        if (checkUser.role !== "superadmin") {
+            return res.status(403).json({
+                message: "Forbidden access",
+            });
+        }
         const getId: number = Number(req.params.id);
         const hashpassword = await bycriptjs.hash(password, SALT);
         const user = await putUser(getId, {
@@ -74,6 +83,27 @@ export const updateUser = async (req: any, res: any) => {
     } catch (error) {
         res.status(400).json({
             message: "Error updating user",
+            error,
+        });
+    }
+}
+
+export const changePassword = async (req: any, res: any) => {
+    try {
+        const {password} = req.body;
+        const getId: number = Number(req.params.id);
+        const hashpassword = await bycriptjs.hash(password, SALT);
+        const user = await putUser(getId, {
+            password: hashpassword,
+        });
+
+        res.status(200).json({
+            message: "Password updated successfully",
+            user,
+        });
+    } catch (error) {
+        res.status(400).json({
+            message: "Error updating password",
             error,
         });
     }
@@ -150,8 +180,14 @@ export const authorize = async (req: any, res: any, next: Function) => {
           return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const tokenPayload = jwt.verify(token, process.env.JWT_SECRET_KEY || "secret");
-      req.user = tokenPayload;
+      const tokenPayload = jwt.verify(token, process.env.JWT_SECRET_KEY || "secret") as UsersModel;
+      const user = await getUserByEmail(tokenPayload.email);
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+      req.user = user;
+      console.log("tokenPayload", tokenPayload);
+      
       next();
   } catch (error) {
       console.log(error);
