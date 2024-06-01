@@ -1,7 +1,6 @@
 import bycriptjs from 'bcryptjs';
 import { getAllUsers, getUserId, postUser, putUser, removeUser, getUserByEmail } from '../services/usersService';
 import jwt from 'jsonwebtoken';
-import { log } from 'console';
 import { UsersModel } from '../models/UsersModel';
 
 const SALT : number = 10;
@@ -129,7 +128,8 @@ export const deleteUser = async (req: any, res: any) => {
 export const login = async (req: any, res: any) => {
     try {
         const {email, password} = req.body;
-        const user = await getUserByEmail(email);
+        console.log(email, password,);
+        const user = await getUserByEmail(email);        
         if (!user) {
             return res.status(404).json({
                 message: "User not found",
@@ -153,10 +153,10 @@ export const login = async (req: any, res: any) => {
             message: "Login successfully",
             token,
         });
-    } catch (error) {
+    } catch (error : any) {
         res.status(400).json({
             message: "Error login",
-            error,
+            error: error.message ,
         });
     }
 }
@@ -167,32 +167,3 @@ export const whoami = async (req: any, res: any) => {
         user: req.user,
     });
 }
-
-export const authorize = async (req: any, res: any, next: Function) => {
-  try {
-      const bearerToken = req.headers.authorization;
-      if (!bearerToken) {
-          return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const token = bearerToken.split("Bearer ")[1];
-      if (!token) {
-          return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const tokenPayload = jwt.verify(token, process.env.JWT_SECRET_KEY || "secret") as UsersModel;
-      const user = await getUserByEmail(tokenPayload.email);
-        if (!user) {
-            return res.status(401).json({ message: "Unauthorized" });
-        }
-      req.user = user;
-      console.log("tokenPayload", tokenPayload);
-      
-      next();
-  } catch (error) {
-      console.log(error);
-      res.status(401).json({
-          message: "Unauthorized",
-      });
-  }
-};

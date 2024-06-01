@@ -8,8 +8,12 @@ export class CarsModel extends Model {
   start_rent!: Date;
   finish_rent!: Date;
   availability!: boolean;
+  created_by!: number;
   created_at!: Date;
   updated_at!: Date;
+  update_by!: number;
+  deleted_by!: number;
+  deleted_at!: Date;
 
   static get tableName(){
    return "cars"
