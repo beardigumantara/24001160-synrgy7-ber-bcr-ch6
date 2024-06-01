@@ -84,6 +84,11 @@ export const updateCar = [mUpload.single('image'), async (req: any, res: any) =>
       return res.status(404).json({ message: "Car not found" });
     }
     const checkUser = req.user as UsersModel;
+    if (checkUser.role !== "superadmin") {
+      return res.status(403).json({
+          message: "Forbidden access",
+      });
+    }
     const car = await putCar(getId, {
       name,
       price,
@@ -115,6 +120,11 @@ export const softDeleteCar = async (req: any, res: any) => {
       return res.status(404).json({ message: "Car not found" });
     }
     const checkUser = req.user as UsersModel;
+    if (checkUser.role !== "superadmin") {
+      return res.status(403).json({
+          message: "Forbidden access",
+      });
+    }
     const car = await putCar(getId, {
       deleted_by: checkUser.id,
       deleted_at: new Date(),
