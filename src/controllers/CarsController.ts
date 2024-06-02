@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { mUpload } from "../middlewares/multer";
 import cloudinary from "../config/cloudinary";
 import { getAllCars, getCarId, postCar, putCar, removeCar } from "../services/carsSevice";
+import { UsersModel } from "../models/UsersModel";
 
 export const getCars =  async (req: Request, res: Response) => {
   const cars = await getAllCars();
@@ -27,7 +28,7 @@ export const getCarById = async (req: Request, res: Response) => {
   }
 }
 
-export const createCar = [mUpload.single('image'), async (req: Request, res: Response) => {
+export const createCar = [mUpload.single('image'), async (req: any, res: any) => {
   try {
     const fileBase64 = req.file?.buffer.toString('base64');
     const file = `data:${req.file?.mimetype};base64,${fileBase64}`;
@@ -37,6 +38,7 @@ export const createCar = [mUpload.single('image'), async (req: Request, res: Res
       use_filename: true,
     });
     const {name, price, start_rent, finish_rent, availability} = req.body;
+    const checkUser = req.user as UsersModel;
 
     // Create a new car entry with the Cloudinary image URL
     const car = await postCar({
@@ -46,6 +48,7 @@ export const createCar = [mUpload.single('image'), async (req: Request, res: Res
       start_rent,
       finish_rent,
       availability,
+      created_by: checkUser.id,
     });
 
     console.log({car});
@@ -64,7 +67,7 @@ export const createCar = [mUpload.single('image'), async (req: Request, res: Res
   }
 }];
 
-export const updateCar = [mUpload.single('image'), async (req: Request, res: Response) => {
+export const updateCar = [mUpload.single('image'), async (req: any, res: any) => {
   try {
     const fileBase64 = req.file?.buffer.toString('base64');
     const file = `data:${req.file?.mimetype};base64,${fileBase64}`;
@@ -80,7 +83,12 @@ export const updateCar = [mUpload.single('image'), async (req: Request, res: Res
     if (!existingCar) {
       return res.status(404).json({ message: "Car not found" });
     }
-
+    const checkUser = req.user as UsersModel;
+    if (checkUser.role !== "superadmin") {
+      return res.status(403).json({
+          message: "Forbidden access",
+      });
+    }
     const car = await putCar(getId, {
       name,
       price,
@@ -88,6 +96,7 @@ export const updateCar = [mUpload.single('image'), async (req: Request, res: Res
       start_rent,
       finish_rent,
       availability,
+      updated_by: checkUser.id,
     });
     
     res.status(200).json({
@@ -102,11 +111,42 @@ export const updateCar = [mUpload.single('image'), async (req: Request, res: Res
   }
 }];
 
+export const softDeleteCar = async (req: any, res: any) => {
+  try {
+    const getId: number = Number(req.params.id);
+    
+    const existingCar = await getCarId(getId);
+    if (!existingCar) {
+      return res.status(404).json({ message: "Car not found" });
+    }
+    const checkUser = req.user as UsersModel;
+    if (checkUser.role !== "superadmin") {
+      return res.status(403).json({
+          message: "Forbidden access",
+      });
+    }
+    const car = await putCar(getId, {
+      deleted_by: checkUser.id,
+      deleted_at: new Date(),
+    });
+    
+    res.status(200).json({
+      message: "Deleted a car",
+      car,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Error deleting car",
+      error,
+    });
+  }
+}
+
 export const deleteCar = async (req: Request, res: Response) => {
   try {
     const getId: number = Number(req.params.id);
     const car = await removeCar(getId);
-    res.status(202).json({
+    res.status(200).json({
       message: "Delete a car",
       car,
     });

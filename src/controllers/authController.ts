@@ -1,6 +1,7 @@
 import bycriptjs from 'bcryptjs';
 import { getAllUsers, getUserId, postUser, putUser, removeUser, getUserByEmail } from '../services/usersService';
 import jwt from 'jsonwebtoken';
+import { UsersModel } from '../models/UsersModel';
 
 const SALT : number = 10;
 
@@ -34,13 +35,14 @@ export const getUserById = async (req: any, res: any) => {
 
 export const register = async (req: any, res: any) => {
     try {
-        const {name, email, password, role} = req.body;
+        const defaultRole = "member";
+        const {name, email, password} = req.body;
         const hashpassword = await bycriptjs.hash(password, SALT);
         const user = await postUser({
             name,
             email,
             password: hashpassword,
-            role,
+            role: defaultRole,
         });
 
         res.status(201).json({
@@ -55,15 +57,17 @@ export const register = async (req: any, res: any) => {
     }
 }
 
-export const updateUser = async (req: any, res: any) => {
+export const updateRoleUser = async (req: any, res: any) => {
     try {
-        const {name, email, password, role} = req.body;
+        const {role} = req.body;
+        const checkUser = req.user;
+        if (checkUser.role !== "superadmin") {
+            return res.status(403).json({
+                message: "Forbidden access",
+            });
+        }
         const getId: number = Number(req.params.id);
-        const hashpassword = await bycriptjs.hash(password, SALT);
         const user = await putUser(getId, {
-            name,
-            email,
-            password: hashpassword,
             role,
         });
 
@@ -74,6 +78,27 @@ export const updateUser = async (req: any, res: any) => {
     } catch (error) {
         res.status(400).json({
             message: "Error updating user",
+            error,
+        });
+    }
+}
+
+export const changePassword = async (req: any, res: any) => {
+    try {
+        const {password} = req.body;
+        const getId: number = Number(req.params.id);
+        const hashpassword = await bycriptjs.hash(password, SALT);
+        const user = await putUser(getId, {
+            password: hashpassword,
+        });
+
+        res.status(200).json({
+            message: "Password updated successfully",
+            user,
+        });
+    } catch (error) {
+        res.status(400).json({
+            message: "Error updating password",
             error,
         });
     }
@@ -99,7 +124,8 @@ export const deleteUser = async (req: any, res: any) => {
 export const login = async (req: any, res: any) => {
     try {
         const {email, password} = req.body;
-        const user = await getUserByEmail(email);
+        console.log(email, password,);
+        const user = await getUserByEmail(email);        
         if (!user) {
             return res.status(404).json({
                 message: "User not found",
@@ -123,10 +149,10 @@ export const login = async (req: any, res: any) => {
             message: "Login successfully",
             token,
         });
-    } catch (error) {
+    } catch (error : any) {
         res.status(400).json({
             message: "Error login",
-            error,
+            error: error.message ,
         });
     }
 }
@@ -137,26 +163,3 @@ export const whoami = async (req: any, res: any) => {
         user: req.user,
     });
 }
-
-export const authorize = async (req: any, res: any, next: Function) => {
-  try {
-      const bearerToken = req.headers.authorization;
-      if (!bearerToken) {
-          return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const token = bearerToken.split("Bearer ")[1];
-      if (!token) {
-          return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const tokenPayload = jwt.verify(token, process.env.JWT_SECRET_KEY || "secret");
-      req.user = tokenPayload;
-      next();
-  } catch (error) {
-      console.log(error);
-      res.status(401).json({
-          message: "Unauthorized",
-      });
-  }
-};
