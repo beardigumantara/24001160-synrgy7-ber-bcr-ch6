@@ -6,11 +6,14 @@ import usersRouter from './routes/user.routes';
 import knex from 'knex';
 import { Model } from 'objection';
 import dotenv from 'dotenv';
+import swaggerUI from 'swagger-ui-express';
+import YAML from 'yamljs';
 
 dotenv.config();
 
 const port = 8000;
 const app = express();
+const swaggerDocument = YAML.load('./openapi.yaml');
 
 const knexInstance = knex({
   client: "postgresql",
@@ -33,6 +36,7 @@ app.get('/', (_req, res) => {
 
 app.use('/api/cars', carsRouter);
 app.use('/api/users', usersRouter);
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 const server = http.createServer(app);
 server.listen(port, () => {
   console.log('========= Connected to Server =========');
