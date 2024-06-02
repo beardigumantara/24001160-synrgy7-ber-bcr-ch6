@@ -22,13 +22,21 @@ This is a Restful API using Typescript, Node, Express, and for the image using c
 
 ### ENDPOINT LIST
 
-| API ENDPOINT          | METHOD   |     DESCRIPTION        |
-|-----------------------|----------|------------------------|
-| `/api/cars`           |   `GET`  | Get All Data Cars      |
-| `/api/cars/:id`       |   `GET`  | Get By Id Data Cars    |
-| `/api/cars/create`    |  `POST`  | Post Data Cars         |
-| `/api/cars/:id`       |   `PUT`  | Update Data Cars By Id |
-| `/api/cars/:id`       | `DELETE` | Delete Data Cars By Id |
+| API ENDPOINT                     | METHOD   |     DESCRIPTION        |
+|----------------------------------|----------|------------------------|
+| `/api/cars`                      |   `GET`  | Get All Data Cars      |
+| `/api/cars/:id`                  |   `GET`  | Get By Id Data Cars    |
+| `/api/cars/create`               |  `POST`  | Post Data Cars         |
+| `/api/cars/:id`                  |   `PUT`  | Update Data Cars By Id |
+| `/api/cars/:id`                  | `DELETE` | Delete Data Cars By Id |
+| `/api/users/auth/register`       |  `POST`  | Register data User     |
+| `/api/users/auth/login`          |  `POST`  | Login user             |
+| `/api/users/whoami`              |   `GET`  | Get Token data User    |
+| `/api/users/`                    |   `GET`  | Get All Data Users     |
+| `/api/users/:id`                 |   `GET`  | Get By Id Data Users   |
+| `/api/users/:id`                 |   `PUT`  | Change Role user       |
+| `/api/users/changepass/:id`      |   `PUT`  | Change Password User   |
+| `/api/users/:id`                 | `DELETE` | Delete data User by Id |
 
 ### REQUEST AND RESPONSE DATA
 - **Show All Data Cars**

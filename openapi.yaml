@@ -331,7 +331,7 @@ paths:
         '400':
           description: Error updating password
 
-  /auth/register:
+  /users/auth/register:
     post:
       summary: Register user
       tags:
@@ -366,7 +366,7 @@ paths:
         '400':
           description: Error creating user
 
-  /auth/login:
+  /users/auth/login:
     post:
       summary: Login user
       tags:
@@ -399,7 +399,7 @@ paths:
         '400':
           description: Error login
 
-  /whoami:
+  /users/whoami:
     get:
       summary: Get current user info
       tags:
