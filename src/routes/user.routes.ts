@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { register, login, deleteUser, getAll, getUserById, updateUser, whoami, changePassword } from "../controllers/authController";
+import { register, login, deleteUser, getAll, getUserById, updateRoleUser, whoami, changePassword } from "../controllers/authController";
 import { authorize } from "../middlewares/auth";
 
 const router = Router();
@@ -7,9 +7,10 @@ const router = Router();
 router.post("/auth/register", register);
 router.post("/auth/login", login);
 router.get("/whoami", authorize, whoami);
-router.delete("/user/:id", authorize, deleteUser);
-router.put("/user/:id", authorize, updateUser);
-router.put("/user/:id", authorize, changePassword);
+router.delete("/:id", authorize, deleteUser);
+router.put("/:id", authorize, updateRoleUser);
+router.put("/changepass/:id", authorize, changePassword);
 router.get("/", getAll);
+router.get("/:id", getUserById);
 
 export default router;

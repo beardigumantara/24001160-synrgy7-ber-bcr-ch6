@@ -57,9 +57,9 @@ export const register = async (req: any, res: any) => {
     }
 }
 
-export const updateUser = async (req: any, res: any) => {
+export const updateRoleUser = async (req: any, res: any) => {
     try {
-        const {name, email, password, role} = req.body;
+        const {role} = req.body;
         const checkUser = req.user;
         if (checkUser.role !== "superadmin") {
             return res.status(403).json({
@@ -67,11 +67,7 @@ export const updateUser = async (req: any, res: any) => {
             });
         }
         const getId: number = Number(req.params.id);
-        const hashpassword = await bycriptjs.hash(password, SALT);
         const user = await putUser(getId, {
-            name,
-            email,
-            password: hashpassword,
             role,
         });
 
