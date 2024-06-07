@@ -8,6 +8,7 @@ import { Model } from 'objection';
 import dotenv from 'dotenv';
 import swaggerUI from 'swagger-ui-express';
 import YAML from 'yamljs';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ const knexInstance = knex({
 });
 
 Model.knex(knexInstance);
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
