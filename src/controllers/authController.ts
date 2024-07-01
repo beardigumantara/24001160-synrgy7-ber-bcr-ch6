@@ -6,7 +6,7 @@ import { UsersModel } from '../models/UsersModel';
 const SALT : number = 10;
 
 const createToken = (payload: any) => {
-    return jwt.sign(payload, process.env.JWT_SECRET_KEY || "secret");  
+    return jwt.sign(payload, process.env.JWT_SECRET_KEY || "secret", { expiresIn: '7d' });  
 }
 
 export const getAll = async (req: any, res: any) => {
