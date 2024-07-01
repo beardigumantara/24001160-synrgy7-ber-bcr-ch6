@@ -19,10 +19,12 @@ const swaggerDocument = YAML.load('./openapi.yaml');
 const knexInstance = knex({
   client: "postgresql",
   connection: {
+    host: process.env.PG_HOST,
     database: process.env.PG_DBASE,
     user: process.env.PG_USER,
     password: process.env.PG_PASS, 
-    port: Number(process.env.PG_PORT) ||5432
+    port: Number(process.env.PG_PORT) || 5432,
+    ssl: { rejectUnauthorized: false },
   }
 });
 
