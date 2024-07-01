@@ -14,6 +14,7 @@ const config: { [key: string]: Knex.Config } = {
       database: process.env.PG_DBASE,
       user: process.env.PG_USER,
       password: process.env.PG_PASS,
+      ssl: { rejectUnauthorized: false },
     }
   },
 
