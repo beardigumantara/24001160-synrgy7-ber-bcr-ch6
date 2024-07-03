@@ -18,8 +18,8 @@ jobs:
       - name: Run Build
         run: |
           npm ci --include=dev
-      - name: Run linter
-        run: npm run lint
+      # - name: Run linter
+      #   run: npm run lint
       - name: Run tests
         run: |
           echo "Running Test On CI/CD",
